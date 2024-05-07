@@ -66,7 +66,11 @@ object Test : BaseTransformInstructionsPatch<Triple<TwoRegisterInstruction, Int,
                              iget-object v14, v1, Lapky;->f:Ljava/lang/String;
                              invoke-static { v14 }, Lapp/revanced/Test;->hook(Ljava/lang/String;)Ljava/lang/String;
                              move-result-object v14
-                             if-eqz v14, :null
+                             if-nez v14, :ok
+                             const/4 v14, 0x0
+                             move-object/from16 v1, p5
+                             goto :null
+                             :ok
                              iput-object v14, v1, Lapky;->f:Ljava/lang/String;
                         """,
                         ExternalLabel("null", getInstruction(i1 - 7)),
@@ -76,11 +80,11 @@ object Test : BaseTransformInstructionsPatch<Triple<TwoRegisterInstruction, Int,
                     addInstructionsWithLabels(
                         i2 + 1,
                         """
-                             iget-object v3, v14, Lapky;->f:Ljava/lang/String;
-                             invoke-static { v3 }, Lapp/revanced/Test;->hook(Ljava/lang/String;)Ljava/lang/String;
-                             move-result-object v3
-                             if-eqz v3, :null
-                             iput-object v3, v14, Lapky;->f:Ljava/lang/String;
+                             iget-object v15, v14, Lapky;->f:Ljava/lang/String;
+                             invoke-static { v15 }, Lapp/revanced/Test;->hook(Ljava/lang/String;)Ljava/lang/String;
+                             move-result-object v15
+                             if-eqz v15, :null
+                             iput-object v15, v14, Lapky;->f:Ljava/lang/String;
                         """,
                         ExternalLabel("null", getInstruction(i2 - 6)),
                     )
