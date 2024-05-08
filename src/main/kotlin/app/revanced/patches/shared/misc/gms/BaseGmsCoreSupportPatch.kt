@@ -41,8 +41,17 @@ object Test : BaseTransformInstructionsPatch<Triple<TwoRegisterInstruction, Int,
         instruction: Instruction,
         instructionIndex: Int,
     ): Triple<TwoRegisterInstruction, Int, Boolean>? {
+        if (classDef.type != "Laadh;") return null
+
         if (instruction.opcode == Opcode.IGET_OBJECT || instruction.opcode == Opcode.IPUT_OBJECT) {
-            if (instruction.getReference<FieldReference>().toString() != "Lapky;->f:Ljava/lang/String;") return null
+            if (
+                instruction.getReference<FieldReference>().toString() !=
+                "Lcom/google/protos/youtube/api/innertube/StreamingDataOuterClass\$StreamingData;->e:Lamhv;" &&
+                instruction.getReference<FieldReference>().toString() !=
+                "Lcom/google/protos/youtube/api/innertube/StreamingDataOuterClass\$StreamingData;->f:Lamhv;"
+            ) {
+                return null
+            }
 
             return Triple(
                 instruction as TwoRegisterInstruction,
@@ -54,6 +63,9 @@ object Test : BaseTransformInstructionsPatch<Triple<TwoRegisterInstruction, Int,
     }
 
     override fun execute(context: BytecodeContext) {
+        super.execute(context)
+
+        return
         context.findClass("VideoStreamingData;")!!.mutableClass.methods.first { it.name == "<init>" && it.parameterTypes.count() == 11 }
             .apply {
                 getInstructions().filter {
@@ -97,21 +109,15 @@ object Test : BaseTransformInstructionsPatch<Triple<TwoRegisterInstruction, Int,
             mutableMethod.addInstructions(
                 entry.second,
                 """
-               invoke-static { v${entry.first.registerA} }, Lapp/revanced/Test;->hook(Ljava/lang/String;)Ljava/lang/String;
-               move-result-object v${entry.first.registerA}
+               invoke-static { v${entry.first.registerA} }, Lapp/revanced/Test;->hook(Ljava/lang/Object;)V
             """,
             )
         } else {
-            if (mutableMethod.name == "v") return
-
             mutableMethod.addInstructions(
-                entry.second,
+                entry.second + 1,
                 """
-                iget-object v${entry.first.registerA}, v${entry.first.registerB}, Lapky;->f:Ljava/lang/String;
-                 invoke-static { v${entry.first.registerA} }, Lapp/revanced/Test;->hook(Ljava/lang/String;)Ljava/lang/String;
-               move-result-object v${entry.first.registerA}
-               iput-object v${entry.first.registerA}, v${entry.first.registerB}, Lapky;->f:Ljava/lang/String;
-            """,
+                  invoke-static { v${entry.first.registerA} }, Lapp/revanced/Test;->hook(Ljava/lang/Object;)V
+                   """,
             )
         }
     }
